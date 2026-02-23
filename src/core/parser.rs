@@ -79,10 +79,10 @@ impl Parser {
     /// Parse .env content from a string
     pub fn parse_content(&self, content: &str) -> ParseResult<HashMap<String, String>> {
         let mut vars = HashMap::new();
-        
+
         for (line_num, line) in content.lines().enumerate() {
             let line_num = line_num + 1; // 1-indexed for user-facing errors
-            
+
             // Skip empty lines and comments
             let line = line.trim();
             if line.is_empty() || line.starts_with('#') {
@@ -91,7 +91,7 @@ impl Parser {
 
             // Parse key=value
             let (key, value) = self.parse_line(line, line_num)?;
-            
+
             // Validate key format
             if !self.is_valid_key(&key) {
                 return Err(ParseError::InvalidKey {
@@ -142,10 +142,10 @@ impl Parser {
         match first_char {
             // Double-quoted string - handle escape sequences
             '"' => self.parse_double_quoted(value, line_num),
-            
+
             // Single-quoted string - no escapes, literal
             '\'' => self.parse_single_quoted(value, line_num),
-            
+
             // Unquoted value
             _ => Ok(self.parse_unquoted(value)),
         }
@@ -236,12 +236,7 @@ impl Parser {
         let mut expansion_stack = Vec::new();
 
         for (key, value) in vars.iter() {
-            let expanded_value = self.expand_value(
-                value,
-                vars,
-                &mut expansion_stack,
-                0,
-            )?;
+            let expanded_value = self.expand_value(value, vars, &mut expansion_stack, 0)?;
             expanded.insert(key.clone(), expanded_value);
         }
 
@@ -271,12 +266,9 @@ impl Parser {
         while let Some(ch) = chars.next() {
             if ch == '$' && chars.peek() == Some(&'{') {
                 chars.next(); // consume '{'
-                
+
                 // Extract variable name
-                let var_name: String = chars
-                    .by_ref()
-                    .take_while(|&c| c != '}')
-                    .collect();
+                let var_name: String = chars.by_ref().take_while(|&c| c != '}').collect();
 
                 // Check for circular dependency
                 if stack.contains(&var_name) {
@@ -287,12 +279,12 @@ impl Parser {
                 }
 
                 // Get variable value
-                let var_value = vars.get(&var_name).ok_or_else(|| {
-                    ParseError::UndefinedVariable {
-                        line: 0,
-                        var: var_name.clone(),
-                    }
-                })?;
+                let var_value =
+                    vars.get(&var_name)
+                        .ok_or_else(|| ParseError::UndefinedVariable {
+                            line: 0,
+                            var: var_name.clone(),
+                        })?;
 
                 // Recursively expand the variable value
                 stack.push(var_name.clone());
@@ -396,8 +388,14 @@ FULL_URL=${API_URL}/v1
 "#;
         let vars = parser.parse_content(content).unwrap();
         assert_eq!(vars.get("BASE"), Some(&"http://localhost".to_string()));
-        assert_eq!(vars.get("API_URL"), Some(&"http://localhost/api".to_string()));
-        assert_eq!(vars.get("FULL_URL"), Some(&"http://localhost/api/v1".to_string()));
+        assert_eq!(
+            vars.get("API_URL"),
+            Some(&"http://localhost/api".to_string())
+        );
+        assert_eq!(
+            vars.get("FULL_URL"),
+            Some(&"http://localhost/api/v1".to_string())
+        );
     }
 
     #[test]
@@ -420,13 +418,16 @@ FULL_URL=${API_URL}/v1
         let content = "A=${B}\nB=${A}";
         let result = parser.parse_content(content);
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ParseError::CircularExpansion { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            ParseError::CircularExpansion { .. }
+        ));
     }
 
     #[test]
     fn test_invalid_key_format() {
         let parser = Parser::default();
-        
+
         // Key starting with number
         let content = "1KEY=value";
         let result = parser.parse_content(content);
@@ -444,7 +445,10 @@ FULL_URL=${API_URL}/v1
         let content = r#"KEY="unterminated"#;
         let result = parser.parse_content(content);
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ParseError::UnterminatedString { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            ParseError::UnterminatedString { .. }
+        ));
     }
 
     #[test]
@@ -469,7 +473,7 @@ FULL_URL=${API_URL}/v1
         let mut config = ParserConfig::default();
         config.strict = true;
         let parser = Parser::new(config);
-        
+
         let content = "lowercase=value";
         let result = parser.parse_content(content);
         assert!(result.is_err());
@@ -480,7 +484,7 @@ FULL_URL=${API_URL}/v1
         let mut config = ParserConfig::default();
         config.allow_expansion = false;
         let parser = Parser::new(config);
-        
+
         let content = "KEY=${OTHER}";
         let vars = parser.parse_content(content).unwrap();
         assert_eq!(vars.get("KEY"), Some(&"${OTHER}".to_string()));
@@ -508,11 +512,20 @@ API_BASE=http://localhost:8000
 API_V1=${API_BASE}/api/v1
 "#;
         let vars = parser.parse_content(content).unwrap();
-        
-        assert_eq!(vars.get("DATABASE_URL"), Some(&"postgresql://user:pass@localhost:5432/mydb".to_string()));
-        assert_eq!(vars.get("SECRET_KEY"), Some(&"django-insecure-abc123".to_string()));
+
+        assert_eq!(
+            vars.get("DATABASE_URL"),
+            Some(&"postgresql://user:pass@localhost:5432/mydb".to_string())
+        );
+        assert_eq!(
+            vars.get("SECRET_KEY"),
+            Some(&"django-insecure-abc123".to_string())
+        );
         assert_eq!(vars.get("DEBUG"), Some(&"True".to_string()));
-        assert_eq!(vars.get("API_V1"), Some(&"http://localhost:8000/api/v1".to_string()));
+        assert_eq!(
+            vars.get("API_V1"),
+            Some(&"http://localhost:8000/api/v1".to_string())
+        );
         assert_eq!(vars.len(), 9);
     }
 }

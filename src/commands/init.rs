@@ -16,9 +16,18 @@ pub fn run(
         println!("{}", "Running init in verbose mode".dimmed());
     }
 
-    println!("\n{}", "┌─ dotenv-space init ─────────────────────────────────┐".cyan());
-    println!("{}", "│ Let's set up environment variables for your project │".cyan());
-    println!("{}\n", "└──────────────────────────────────────────────────────┘".cyan());
+    println!(
+        "\n{}",
+        "┌─ dotenv-space init ─────────────────────────────────┐".cyan()
+    );
+    println!(
+        "{}",
+        "│ Let's set up environment variables for your project │".cyan()
+    );
+    println!(
+        "{}\n",
+        "└──────────────────────────────────────────────────────┘".cyan()
+    );
 
     // Determine stack (interactive or from flag)
     let selected_stack = if let Some(s) = stack {
@@ -39,7 +48,7 @@ pub fn run(
             .items(&stacks)
             .default(0)
             .interact()?;
-        
+
         match selection {
             0 => "python",
             1 => "nodejs",
@@ -47,7 +56,8 @@ pub fn run(
             3 => "go",
             4 => "php",
             _ => "other",
-        }.to_string()
+        }
+        .to_string()
     };
 
     // Determine services (interactive or from flag)
@@ -71,8 +81,9 @@ pub fn run(
             .with_prompt("Which services will you use? (Space to select, Enter to confirm)")
             .items(&services)
             .interact()?;
-        
-        selections.iter()
+
+        selections
+            .iter()
             .map(|&i| services[i].to_lowercase().replace(" ", "_"))
             .collect()
     };
@@ -90,14 +101,17 @@ pub fn run(
     // Generate .env.example content
     let env_example_content = generate_env_example(&selected_stack, &selected_services);
     let env_example_path = Path::new(&output_path).join(".env.example");
-    
+
     // Check if file already exists
     if env_example_path.exists() && !yes {
         let overwrite = Confirm::new()
-            .with_prompt(format!("{} already exists. Overwrite?", env_example_path.display()))
+            .with_prompt(format!(
+                "{} already exists. Overwrite?",
+                env_example_path.display()
+            ))
             .default(false)
             .interact()?;
-        
+
         if !overwrite {
             println!("{}", "Aborted.".yellow());
             return Ok(());
@@ -107,18 +121,28 @@ pub fn run(
     // Write .env.example
     fs::write(&env_example_path, env_example_content.trim())
         .context("Failed to write .env.example")?;
-    
-    let var_count = env_example_content.lines().filter(|l| l.contains('=')).count();
-    println!("{} Created .env.example with {} variables", "✓".green(), var_count);
+
+    let var_count = env_example_content
+        .lines()
+        .filter(|l| l.contains('='))
+        .count();
+    println!(
+        "{} Created .env.example with {} variables",
+        "✓".green(),
+        var_count
+    );
 
     // Create .env from template
     let env_path = Path::new(&output_path).join(".env");
     if !env_path.exists() {
-        let mut env_content = "# TODO: Replace all placeholder values with real credentials\n\n".to_string();
+        let mut env_content =
+            "# TODO: Replace all placeholder values with real credentials\n\n".to_string();
         env_content.push_str(&env_example_content);
-        fs::write(&env_path, env_content)
-            .context("Failed to write .env")?;
-        println!("{} Created .env from template (fill in real values)", "✓".green());
+        fs::write(&env_path, env_content).context("Failed to write .env")?;
+        println!(
+            "{} Created .env from template (fill in real values)",
+            "✓".green()
+        );
     }
 
     // Update .gitignore
@@ -132,7 +156,10 @@ pub fn run(
             println!("{} Added .env to .gitignore", "✓".green());
         }
     } else {
-        fs::write(&gitignore_path, "# Environment files\n.env\n.env.local\n.env.*.local\n")?;
+        fs::write(
+            &gitignore_path,
+            "# Environment files\n.env\n.env.local\n.env.*.local\n",
+        )?;
         println!("{} Created .gitignore", "✓".green());
     }
 
@@ -177,7 +204,8 @@ fn generate_env_example(stack: &str, services: &[String]) -> String {
         match service.as_str() {
             "postgresql" => {
                 content.push_str("# Database\n");
-                content.push_str("DATABASE_URL=postgresql://user:password@localhost:5432/dbname\n\n");
+                content
+                    .push_str("DATABASE_URL=postgresql://user:password@localhost:5432/dbname\n\n");
             }
             "redis" => {
                 content.push_str("# Cache\n");
@@ -190,7 +218,8 @@ fn generate_env_example(stack: &str, services: &[String]) -> String {
             "aws_s3" => {
                 content.push_str("# AWS S3\n");
                 content.push_str("AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\n");
-                content.push_str("AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\n");
+                content
+                    .push_str("AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY\n");
                 content.push_str("AWS_STORAGE_BUCKET_NAME=your-bucket-name\n");
                 content.push_str("AWS_REGION=us-east-1\n\n");
             }
@@ -217,7 +246,8 @@ fn generate_env_example(stack: &str, services: &[String]) -> String {
     }
 
     // Add generation footer
-    content.push_str(&format!("# Generated by dotenv-space v{} on {}\n",
+    content.push_str(&format!(
+        "# Generated by dotenv-space v{} on {}\n",
         env!("CARGO_PKG_VERSION"),
         chrono::Local::now().format("%Y-%m-%d")
     ));

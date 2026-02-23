@@ -1,303 +1,302 @@
-## dotenv-space CLI
+# dotenv-space CLI
 
-**A powerful Rust CLI for managing environment variables — validation, scanning, conversion, and migration.**
+[![CI](https://github.com/urwithajit9/dotenv-space/workflows/CI/badge.svg)](https://github.com/urwithajit9/dotenv-space/actions)
+[![Release](https://img.shields.io/github/v/release/urwithajit9/dotenv-space)](https://github.com/urwithajit9/dotenv-space/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-dotenv-space solves the real-world problems developers face daily when working with `.env` files and secret management systems. It helps you validate configs, detect leaked secrets, convert formats, and migrate to modern secret managers — all locally, securely, and with zero telemetry.
+A comprehensive CLI tool for managing `.env` files — validation, secret scanning, and format conversion.
 
----
+**Website:** [dotenv.space](https://dotenv.space)
 
-## ✨ Features
+## Why dotenv-space?
 
-* Interactive project initialization
-* Validate `.env` against `.env.example`
-* Detect accidentally committed secrets
-* Convert `.env` to multiple formats (JSON, YAML, Terraform, Docker, etc.)
-* Migration workflows to secret managers
-* Sync `.env` and `.env.example`
-* Template rendering from env variables
-* Encrypted backups
-* Project diagnostics
-* Beautiful colored terminal output
-* Fully scriptable for CI/CD
+I built this after accidentally pushing AWS credentials to GitHub in a test file during an Airflow refactor (20 DAGs, 300+ Scrapy spiders). The key was revoked immediately, other services went down, and I had to explain the incident to my development head. That conversation was more painful than any billing alert.
 
----
+Three years later, I'm still paranoid about secrets management. This tool is the safety net I wish I'd had.
 
-## 🧠 Design Principles
+## Features
 
-* Interactive by default, scriptable via flags
-* Fail fast with clear errors
-* Zero configuration for common cases
-* Idempotent operations
-* Respect `.gitignore`
-* No network calls unless explicitly migrating
+### Phase 1 (v0.1.0) — Available Now
 
----
+- **`init`** - Interactive project setup, generates `.env.example` for your stack
+- **`validate`** - Comprehensive validation with multiple output formats (pretty, JSON, GitHub Actions)
+- **`scan`** - Secret detection using pattern matching and entropy analysis
+- **`diff`** - Compare `.env` and `.env.example`, find missing/extra variables
+- **`convert`** - Transform to 8 different formats (JSON, AWS, GitHub, Docker, Kubernetes, Shell, Terraform, YAML)
 
-## 📦 Installation
+### Coming Soon
 
-### Using Cargo (recommended)
+- **`migrate`** - Direct migration to secret managers (GitHub Actions, Doppler, AWS Secrets Manager)
+- **`sync`** - Keep `.env` and `.env.example` in sync
+- **`doctor`** - Diagnose common setup issues
+
+## Installation
+
+### Linux / macOS
 
 ```bash
-cargo install dotenv-space
+curl -sSL https://raw.githubusercontent.com/urwithajit9/dotenv-space/main/install.sh | bash
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/your-org/dotenv-space
-cd dotenv-space
-cargo build --release
+cargo install dotenv-space
 ```
 
-Binary will be located at:
-
-```
-target/release/dotenv-space
-```
-
----
-
-## 🚀 Quick Start
-
-### Initialize a project
+### Verify installation
 
 ```bash
+dotenv-space --version
+```
+
+## Quick Start
+
+```bash
+# Create .env.example for your project
 dotenv-space init
-```
 
-Creates:
-
-* `.env.example`
-* `.env`
-* Updates `.gitignore`
-
----
-
-### Validate environment variables
-
-```bash
+# Validate your .env file
 dotenv-space validate
-```
 
-Checks for:
-
-* Missing variables
-* Placeholder values
-* Weak secrets
-* Misconfigurations
-
----
-
-### Scan for exposed secrets
-
-```bash
+# Scan for accidentally committed secrets
 dotenv-space scan
-```
 
-Detects patterns like:
-
-* AWS keys
-* Stripe keys
-* GitHub tokens
-* High-entropy secrets
-
----
-
-### Compare env files
-
-```bash
+# Compare files
 dotenv-space diff
-```
 
-Shows missing, extra, and changed variables.
-
----
-
-### Convert formats
-
-```bash
+# Convert to different formats
 dotenv-space convert --to json
+dotenv-space convert --to aws-secrets
+dotenv-space convert --to github-actions
 ```
 
-Supports:
+## Command Reference
 
-* AWS Secrets Manager JSON
-* GitHub Actions format
-* Docker Compose YAML
-* Kubernetes secrets
-* Terraform tfvars
-* Generic JSON/YAML
-* Shell export script
+### `dotenv-space init`
 
----
-
-## 🧰 Command Reference
-
-```
-dotenv-space <COMMAND> [OPTIONS]
-
-Commands:
-  init       Interactive project setup
-  validate   Validate .env against .env.example
-  scan       Detect exposed secrets
-  diff       Compare .env and .env.example
-  convert    Convert to different formats
-  migrate    Migration workflows
-  sync       Sync env files
-  template   Render templates
-  backup     Create encrypted backup
-  restore    Restore backup
-  doctor     Diagnose issues
-```
-
----
-
-## 🏗 Architecture
-
-```
-src/
- ├── main.rs
- ├── commands/
- ├── core/
- ├── formats/
- ├── templates/
- └── utils/
-```
-
-### Modules
-
-* **commands** → CLI command handlers
-* **core** → parser, validator, scanner
-* **formats** → output converters
-* **templates** → init templates
-* **utils** → helpers (git, UI, patterns)
-
----
-
-## 🔐 Security Model
-
-* Client-side only
-* No telemetry
-* No background services
-* Secrets never transmitted unless explicitly migrating
-* Optional encrypted backups using AES-256-GCM
-
----
-
-## 🧪 Testing
+Interactive setup for new projects.
 
 ```bash
-cargo test
+dotenv-space init                                    # Interactive mode
+dotenv-space init --stack python --services postgres,redis --yes
 ```
 
-Coverage:
+**Supports:** Python, Node.js, Rust, Go, PHP
+**Services:** PostgreSQL, Redis, MongoDB, AWS S3, Stripe, SendGrid, Sentry, OpenAI
+
+### `dotenv-space validate`
+
+Check `.env` against `.env.example` with comprehensive validation.
 
 ```bash
-cargo tarpaulin --out Html
+dotenv-space validate                                # Pretty output
+dotenv-space validate --format json                  # JSON output
+dotenv-space validate --format github-actions        # GitHub Actions annotations
+dotenv-space validate --strict                       # Fail on warnings
 ```
 
----
+**Checks:**
+- Missing required variables
+- Placeholder values (`YOUR_KEY_HERE`, `CHANGE_ME`, etc.)
+- Boolean string trap (`DEBUG="False"` is truthy in Python)
+- Weak `SECRET_KEY` (too short, common patterns)
+- `localhost` in Docker context
+- Extra variables not in `.env.example` (strict mode)
 
-## ⚙️ Configuration
+### `dotenv-space scan`
 
-Supports optional config file:
+Detect accidentally committed secrets.
 
+```bash
+dotenv-space scan                                    # Scan current directory
+dotenv-space scan --path src/                        # Scan specific directory
+dotenv-space scan --format json                      # JSON output
+dotenv-space scan --format sarif                     # SARIF for GitHub Code Scanning
+dotenv-space scan --exclude "*.example"              # Exclude patterns
 ```
-.dotenv-space.toml
+
+**Detects:**
+- AWS Access Keys (`AKIA...`)
+- Stripe Keys (live and test)
+- GitHub Tokens (`ghp_`, `gho_`)
+- OpenAI API Keys
+- Anthropic API Keys
+- Private Keys
+- High-entropy strings (possible secrets)
+
+### `dotenv-space diff`
+
+Compare two env files.
+
+```bash
+dotenv-space diff                                    # Compare .env and .env.example
+dotenv-space diff --show-values                      # Show actual values
+dotenv-space diff --format json                      # JSON output
+dotenv-space diff --reverse                          # Swap comparison direction
 ```
 
-Example:
+### `dotenv-space convert`
+
+Transform `.env` to different formats.
+
+```bash
+dotenv-space convert                                 # Interactive mode
+dotenv-space convert --to json                       # Generic JSON
+dotenv-space convert --to aws-secrets                # AWS Secrets Manager
+dotenv-space convert --to github-actions             # GitHub Actions secrets
+dotenv-space convert --to docker-compose             # Docker Compose YAML
+dotenv-space convert --to kubernetes                 # Kubernetes Secret
+dotenv-space convert --to shell                      # Shell export script
+dotenv-space convert --to terraform                  # Terraform .tfvars
+dotenv-space convert --to yaml                       # Generic YAML
+
+# Advanced options
+dotenv-space convert --to json --output secrets.json         # Write to file
+dotenv-space convert --to json --include "AWS_*"             # Filter variables
+dotenv-space convert --to json --exclude "*_LOCAL"           # Exclude variables
+dotenv-space convert --to json --prefix "APP_"               # Add prefix
+dotenv-space convert --to json --transform lowercase         # Transform keys
+dotenv-space convert --to kubernetes --base64                # Base64-encode values
+```
+
+**Pipe to AWS CLI:**
+```bash
+dotenv-space convert --to aws-secrets | \
+  aws secretsmanager create-secret \
+    --name prod/myapp/config \
+    --secret-string file:///dev/stdin
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+name: Validate Env
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dotenv-space
+        run: |
+          curl -sSL https://raw.githubusercontent.com/urwithajit9/dotenv-space/main/install.sh | bash
+      - name: Validate
+        run: dotenv-space validate --format github-actions
+      - name: Scan for secrets
+        run: dotenv-space scan --format sarif
+```
+
+### Pre-commit Hook
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: dotenv-scan
+        name: Scan for secrets
+        entry: dotenv-space scan --exit-zero
+        language: system
+        pass_filenames: false
+```
+
+## Configuration
+
+Store preferences in `.dotenv-space.toml`:
 
 ```toml
-[project]
-name = "my-app"
-stack = "python"
-
 [validate]
 strict = true
+auto_fix = false
+
+[scan]
+exclude_patterns = ["*.example", "*.sample"]
+ignore_placeholders = true
+
+[convert]
+default_format = "aws-secrets"
 ```
 
----
-
-## 🧩 Shell Completions
+## Development
 
 ```bash
-dotenv-space completions bash > ~/.local/share/bash-completion/completions/dotenv-space
+# Clone repo
+git clone https://github.com/urwithajit9/dotenv-space.git
+cd dotenv-space
+
+# Build
+cargo build --release
+
+# Run tests
+cargo test
+
+# Run clippy
+cargo clippy -- -D warnings
+
+# Format code
+cargo fmt
 ```
 
-Supports:
+## Architecture
 
-* Bash
-* Zsh
-* Fish
-* PowerShell
+- **Parser**: 600 lines, handles all `.env` edge cases (quotes, escapes, expansion)
+- **Converter**: Trait-based system, extensible for new formats
+- **Scanner**: Pattern matching + entropy analysis for secret detection
+- **Commands**: Consistent UX, multiple output formats, proper error handling
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for details.
+
+## Contributing
+
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Areas where help is especially appreciated:
+- Additional format converters (Doppler, GCP, Azure)
+- Secret pattern improvements
+- Documentation improvements
+- Integration examples
+
+## Roadmap
+
+**v0.1.0** (Current)
+- ✅ init, validate, scan, diff, convert
+
+**v0.2.0** (Q1 2026)
+- migrate command (GitHub Actions, Doppler, AWS)
+- sync command
+- More formats (GCP, Azure, Cloudflare)
+
+**v1.0.0** (Q2 2026)
+- doctor command
+- backup/restore with encryption
+- Template generation
+- Homebrew formula
+
+## License
+
+MIT License - see [LICENSE](LICENSE)
+
+## Credits
+
+Built by [Ajit Kumar](https://github.com/urwithajit9) after learning the hard way.
+
+Inspired by countless developers who've accidentally committed secrets. You're not alone.
+
+**Related Projects:**
+- [dotenv.space](https://dotenv.space) - Comprehensive .env documentation
+- [python-dotenv](https://github.com/theskumar/python-dotenv) - Python implementation
+- [dotenvy](https://github.com/allan2/dotenvy) - Rust implementation
+
+## Support
+
+- 🐛 [Report a bug](https://github.com/urwithajit9/dotenv-space/issues/new)
+- 💡 [Request a feature](https://github.com/urwithajit9/dotenv-space/issues/new)
+- 💬 [Start a discussion](https://github.com/urwithajit9/dotenv-space/discussions)
+
 
 ---
 
-## 📊 Roadmap
-
-### Phase 1 (MVP)
-
-* Init
-* Validate
-* Scan
-* Diff
-
-### Phase 2
-
-* Convert
-* Migrate
-* Sync
-
-### Phase 3
-
-* Templates
-* Backup / Restore
-* Doctor
-
----
-
-## 🚫 Non-Goals
-
-* Secret storage service
-* Daemon/service mode
-* Web UI
-* Runtime env injection
-* Database integrations
-
----
-
-## 🤔 Why Rust?
-
-* Single static binary
-* High performance
-* Strong type safety
-* Excellent CLI ecosystem
-* No runtime dependencies
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome.
-
-Steps:
-
-1. Fork repository
-2. Create feature branch
-3. Add tests
-4. Submit PR
-
----
-
-## 📄 License
-
-MIT License (recommended — adjust if needed)
-
----
-
-## ⭐ Vision
-
-dotenv-space aims to become the standard CLI for environment variable management across stacks — from local development to production secret migrations — with a focus on safety, usability, and developer experience.
-
-
+**If this tool saved you from a secrets incident, consider [starring the repo](https://github.com/urwithajit9/dotenv-space) ⭐**

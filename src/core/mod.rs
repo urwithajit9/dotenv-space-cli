@@ -1,4 +1,8 @@
+pub mod config;
+pub mod converter;
 pub mod parser;
 
 // Re-export commonly used types
-pub use parser::{Parser, ParserConfig, EnvFile, ParseError, ParseResult};
+pub use config::Config;
+pub use converter::{ConvertOptions, Converter, KeyTransform};
+pub use parser::{EnvFile, ParseError, ParseResult, Parser, ParserConfig};

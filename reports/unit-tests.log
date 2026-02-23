@@ -1,0 +1,59 @@
+   Compiling assert_cmd v2.1.2
+   Compiling dotenv-space-cli v0.1.0 (/Users/kumarajit/Documents/dotenv-space-cli)
+error: character literal may only contain one codepoint
+   --> src/commands/scan.rs:184:37
+    |
+184 |             if name_str.starts_with('.env') 
+    |                                     ^^^^^^
+    |
+help: if you meant to write a string literal, use double quotes
+    |
+184 -             if name_str.starts_with('.env') 
+184 +             if name_str.starts_with(".env") 
+    |
+
+error: unknown start of token: \
+  --> src/utils/patterns.rs:66:75
+   |
+66 |     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z_\-]{32,})['\"]?").unwrap();
+   |                                                                           ^
+
+error: unknown start of token: \
+  --> src/utils/patterns.rs:66:82
+   |
+66 |     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z_\-]{32,})['\"]?").unwrap();
+   |                                                                                  ^
+
+error: character literal may only contain one codepoint
+  --> src/utils/patterns.rs:66:86
+   |
+66 |     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z_\-]{32,})['\"]?").unwrap();
+   |                                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+help: if you meant to write a string literal, use double quotes
+   |
+66 -     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z_\-]{32,})['\"]?").unwrap();
+66 +     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*["\"]?([0-9a-zA-Z_\-]{32,})["\"]?").unwrap();
+   |
+
+error: unknown start of token: \
+  --> src/utils/patterns.rs:66:114
+   |
+66 |     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z_\-]{32,})['\"]?").unwrap();
+   |                                                                                                                  ^
+
+error: mismatched closing delimiter: `]`
+  --> src/utils/patterns.rs:66:55
+   |
+66 |     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z_\-]{32,})['\"]?").unwrap();
+   |                                                       ^                 ^ mismatched closing delimiter
+   |                                                       |
+   |                                                       unclosed delimiter
+
+error: mismatched closing delimiter: `)`
+  --> src/utils/patterns.rs:66:85
+   |
+66 |     pub static ref GENERIC_API_KEY: Regex = Regex::new(r"api[_-]?key['\"]?\s*[:=]\s*['\"]?([0-9a-zA-Z_\-]{32,})['\"]?").unwrap();
+   |                                                                                     ^ unclosed delimiter              ^ mismatched closing delimiter
+
+error: could not compile `dotenv-space-cli` (lib test) due to 7 previous errors
