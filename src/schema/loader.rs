@@ -10,7 +10,7 @@ use super::models::{FrameworkConfig, Schema, ServiceConfig, StackBlueprint};
 const SCHEMA_JSON: &str = include_str!("../assets/schema.json");
 
 /// Global singleton for loaded schema
-static SCHEMA: OnceLock<Schema> = OnceLock::new();
+static _SCHEMA: OnceLock<Schema> = OnceLock::new();
 
 /// Get the global schema instance, loading if necessary
 /// Global singleton for loaded schema (stable Rust compatible)
@@ -96,9 +96,7 @@ pub fn get_frameworks_for_language(language_id: &str) -> Option<Vec<(&'static st
             .iter()
             .map(|(id, fw)| {
                 let display = fw
-                    .display_name
-                    .as_ref()
-                    .map(|s| s.as_str())
+                    .display_name.as_deref()
                     .unwrap_or(id)
                     .to_string();
                 (id.as_str(), display)
@@ -148,9 +146,7 @@ fn extract_service_names(
         .iter()
         .map(|(id, cfg)| {
             let display = cfg
-                .display_name
-                .as_ref()
-                .map(|s| s.as_str())
+                .display_name.as_deref()          
                 .unwrap_or(id)
                 .to_string();
             (id.as_str(), display)

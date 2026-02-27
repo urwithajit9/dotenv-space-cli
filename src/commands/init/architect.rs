@@ -164,52 +164,7 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
     Ok(())
 }
 
-/// Handle architect mode with pre-filled defaults (for legacy flag compatibility)
-pub fn handle_with_defaults(
-    stack: Option<String>,
-    services: Option<String>,
-    path: String,
-    yes: bool,
-    verbose: bool,
-) -> Result<()> {
-    // Map legacy stack names to language/framework
-    let (language_id, framework_id) = match stack.as_deref().unwrap_or("python") {
-        "python" => ("python", "django"),
-        "nodejs" => ("javascript_typescript", "express_fastify"),
-        "rust" => ("rust", "axum_actix"),
-        "go" => ("go", "gin_echo"),
-        "php" => ("php", "laravel"),
-        _ => ("python", "django"),
-    };
 
-    // Parse services
-    let selected_services: Vec<String> = services
-        .as_ref()
-        .map(|s| s.split(',').map(|x| x.trim().to_string()).collect())
-        .unwrap_or_default();
-
-    // Resolve and generate (same as interactive flow)
-    let vars = resolver::resolve_architect_selection(
-        language_id,
-        framework_id,
-        &selected_services,
-        &[], // No infra in legacy mode
-    )?;
-
-    let example_content = formatter::format_env_example(&vars, true)?;
-    let template_content = formatter::format_env_template(&vars)?;
-
-    let output_path = Path::new(&path);
-    super::shared::write_env_files(output_path, &example_content, &template_content)?;
-
-    println!(
-        "{} Created .env.example with {} variables",
-        "✓".green(),
-        vars.vars.len()
-    );
-
-    Ok(())
-}
 
 fn format_language_display(id: &str) -> String {
     match id {

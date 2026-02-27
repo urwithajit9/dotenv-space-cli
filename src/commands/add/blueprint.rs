@@ -9,7 +9,7 @@ use std::path::Path;
 
 use super::shared::{append_to_env_files, detect_conflicts, AppendMode};
 use crate::schema::{formatter, loader, resolver};
-use crate::utils::ui::{info, print_header, print_preview_header, success, warning};
+use crate::utils::ui::{info, warning};
 
 /// Handle blueprint addition
 pub fn handle(blueprint_id: &str, output_path: &Path, yes: bool, verbose: bool) -> Result<()> {

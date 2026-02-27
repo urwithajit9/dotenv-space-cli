@@ -5,10 +5,10 @@ use std::fs;
 use std::path::Path;
 
 use crate::schema::{formatter, loader, resolver};
-use crate::utils::ui::{print_header, print_preview_header, success, warning};
+use crate::utils::ui::{print_header, print_preview_header, success};
 
 /// Handle `evnx add service <service_id>`
-pub fn handle(service_id: &str, path: &str, yes: bool, verbose: bool) -> Result<()> {
+pub fn handle(service_id: &str, path: &str, yes: bool, _verbose: bool) -> Result<()> {
     if !yes {
         print_header(
             "Add Service",

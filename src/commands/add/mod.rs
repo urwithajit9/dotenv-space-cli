@@ -7,7 +7,7 @@
 //! - `custom`          — Interactive custom variable addition
 
 use anyhow::Result;
-use colored::*;
+// use colored::*;
 use std::path::Path;
 
 pub mod blueprint;
@@ -15,7 +15,7 @@ pub mod custom;
 pub mod framework;
 pub mod service;
 pub mod shared;
-use crate::utils::ui::{info, print_header, print_next_steps, success, warning};
+use crate::utils::ui::{print_header, print_next_steps};
 
 // use shared::{AppendMode, append_to_env_files};
 

@@ -6,7 +6,7 @@
 //! 3. If Architect: step through language → framework → services → infra
 //! 4. Generate .env.example and .env with deduplicated, categorized variables
 
-use crate::utils::ui::{info, print_header, print_next_steps, success};
+use crate::utils::ui::{ print_header, print_next_steps};
 use anyhow::Result;
 use colored::*;
 use dialoguer::Select;

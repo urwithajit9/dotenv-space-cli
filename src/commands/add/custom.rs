@@ -141,14 +141,14 @@ pub fn handle(output_path: &Path, yes: bool, verbose: bool) -> Result<()> {
         println!("  • {} variables to add", additions.len());
     }
 
-    let categories: Vec<_> = additions
+    let _categories: Vec<_> = additions
         .iter()
         .filter_map(|(_, _, cat)| cat.as_ref())
         .collect();
 
     let categories: Vec<String> = additions
         .iter()
-        .filter_map(|(_, _, cat)| cat.as_ref().map(|s| s.clone()))
+        .filter_map(|(_, _, cat)| cat.as_ref().cloned())
         .collect();
 
     if !categories.is_empty() {

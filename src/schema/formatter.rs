@@ -205,7 +205,7 @@ pub fn generate_preview(vars: &VarCollection) -> String {
     let mut categories: Vec<String> = vars
         .vars
         .values()
-        .filter_map(|m| m.category.as_ref().map(|s| s.clone()))
+        .filter_map(|m| m.category.clone())
         .collect();
     categories.sort();
     categories.dedup();
