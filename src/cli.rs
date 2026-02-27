@@ -112,11 +112,11 @@ pub enum Commands {
         target: AddTarget,
 
         /// Output path (default: current directory).
-        #[arg(long, short, default_value = ".")]
+        #[arg(long, short, default_value = ".", global = true)]
         path: String,
 
         /// Skip confirmation prompts.
-        #[arg(long, short)]
+        #[arg(long, short, global = true)]
         yes: bool,
     },
 
