@@ -164,8 +164,6 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
     Ok(())
 }
 
-
-
 fn format_language_display(id: &str) -> String {
     match id {
         "javascript_typescript" => "JavaScript / TypeScript".to_string(),

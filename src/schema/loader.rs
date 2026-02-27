@@ -95,10 +95,7 @@ pub fn get_frameworks_for_language(language_id: &str) -> Option<Vec<(&'static st
         lang.frameworks
             .iter()
             .map(|(id, fw)| {
-                let display = fw
-                    .display_name.as_deref()
-                    .unwrap_or(id)
-                    .to_string();
+                let display = fw.display_name.as_deref().unwrap_or(id).to_string();
                 (id.as_str(), display)
             })
             .collect(),
@@ -145,10 +142,7 @@ fn extract_service_names(
     services
         .iter()
         .map(|(id, cfg)| {
-            let display = cfg
-                .display_name.as_deref()          
-                .unwrap_or(id)
-                .to_string();
+            let display = cfg.display_name.as_deref().unwrap_or(id).to_string();
             (id.as_str(), display)
         })
         .collect()
