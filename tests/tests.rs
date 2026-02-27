@@ -2,7 +2,7 @@
 ///
 /// Tests actual command execution with real files
 use assert_cmd::cargo::cargo_bin_cmd; // ✅ Updated import
-// use assert_cmd::prelude::*;
+                                      // use assert_cmd::prelude::*;
 use predicates::prelude::*;
 use serde_json;
 use std::fs;

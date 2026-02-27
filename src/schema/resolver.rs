@@ -3,11 +3,11 @@
 use anyhow::Result;
 // use std::collections::HashMap;
 
-use super::models::{
-    FrameworkConfig, InfrastructureConfig, ServiceConfig, StackBlueprint,
-    VarCollection, VarMetadata, VarSource,
-};
 use super::loader::schema;
+use super::models::{
+    FrameworkConfig, InfrastructureConfig, ServiceConfig, StackBlueprint, VarCollection,
+    VarMetadata, VarSource,
+};
 
 /// Resolve a blueprint into a collection of environment variables
 pub fn resolve_blueprint(blueprint: &StackBlueprint) -> Result<VarCollection> {
@@ -83,7 +83,7 @@ pub fn resolve_service(service_id: &str, service: &ServiceConfig) -> Result<VarC
 pub fn resolve_framework(
     _language_id: &str,
     framework_id: &str,
-    framework: &FrameworkConfig
+    framework: &FrameworkConfig,
 ) -> Result<VarCollection> {
     let mut collection = VarCollection::default();
     add_framework_vars(&mut collection, framework_id, framework);
@@ -99,7 +99,9 @@ pub fn add_framework_vars(
     for var_name in &fw.vars {
         collection.vars.entry(var_name.clone()).or_insert_with(|| {
             VarMetadata {
-                example_value: fw.defaults.get(var_name)
+                example_value: fw
+                    .defaults
+                    .get(var_name)
                     .cloned()
                     .unwrap_or_else(|| format!("your_{}_value", var_name.to_lowercase())),
                 description: fw.descriptions.get(var_name).cloned(),
@@ -115,27 +117,27 @@ pub fn add_framework_vars(
 }
 
 /// Add service variables to collection
-pub fn add_service_vars(
-    collection: &mut VarCollection,
-    service_id: &str,
-    svc: &ServiceConfig,
-) {
-    let category = svc.category.clone().or_else(|| {
-        infer_category_from_service(service_id)
-    });
+pub fn add_service_vars(collection: &mut VarCollection, service_id: &str, svc: &ServiceConfig) {
+    let category = svc
+        .category
+        .clone()
+        .or_else(|| infer_category_from_service(service_id));
 
     for var_name in &svc.vars {
-        collection.vars.entry(var_name.clone()).or_insert_with(|| {
-            VarMetadata {
-                example_value: svc.defaults.get(var_name)
+        collection
+            .vars
+            .entry(var_name.clone())
+            .or_insert_with(|| VarMetadata {
+                example_value: svc
+                    .defaults
+                    .get(var_name)
                     .cloned()
                     .unwrap_or_else(|| format!("your_{}_value", var_name.to_lowercase())),
                 description: svc.descriptions.get(var_name).cloned(),
                 category: category.clone(),
                 required: svc.required.contains(var_name),
                 source: VarSource::Service(service_id.to_string()),
-            }
-        });
+            });
     }
 }
 
@@ -145,20 +147,26 @@ pub fn add_infra_vars(
     infra_id: &str,
     infra: &InfrastructureConfig,
 ) {
-    let category = infra.category.clone().or(Some("Infrastructure".to_string()));
+    let category = infra
+        .category
+        .clone()
+        .or(Some("Infrastructure".to_string()));
 
     for var_name in &infra.vars {
-        collection.vars.entry(var_name.clone()).or_insert_with(|| {
-            VarMetadata {
-                example_value: infra.defaults.get(var_name)
+        collection
+            .vars
+            .entry(var_name.clone())
+            .or_insert_with(|| VarMetadata {
+                example_value: infra
+                    .defaults
+                    .get(var_name)
                     .cloned()
                     .unwrap_or_else(|| format!("your_{}_value", var_name.to_lowercase())),
                 description: infra.descriptions.get(var_name).cloned(),
                 category: category.clone(),
                 required: false,
                 source: VarSource::Infrastructure(infra_id.to_string()),
-            }
-        });
+            });
     }
 }
 
@@ -168,13 +176,20 @@ fn infer_category(var_name: &str) -> Option<String> {
 
     if name_lower.contains("secret") || name_lower.contains("key") || name_lower.contains("token") {
         Some("Security".to_string())
-    } else if name_lower.contains("database") || name_lower.contains("db_") || name_lower.contains("postgres") || name_lower.contains("mysql") {
+    } else if name_lower.contains("database")
+        || name_lower.contains("db_")
+        || name_lower.contains("postgres")
+        || name_lower.contains("mysql")
+    {
         Some("Database".to_string())
     } else if name_lower.contains("redis") {
         Some("Cache".to_string())
     } else if name_lower.contains("auth") || name_lower.contains("oauth") {
         Some("Auth".to_string())
-    } else if name_lower.contains("url") || name_lower.contains("host") || name_lower.contains("port") {
+    } else if name_lower.contains("url")
+        || name_lower.contains("host")
+        || name_lower.contains("port")
+    {
         Some("Connection".to_string())
     } else if name_lower.contains("aws") || name_lower.contains("s3") {
         Some("Cloud".to_string())
@@ -185,19 +200,37 @@ fn infer_category(var_name: &str) -> Option<String> {
 
 /// Helper: Infer category from service ID
 fn infer_category_from_service(service_id: &str) -> Option<String> {
-    if service_id.contains("postgres") || service_id.contains("mysql") || service_id.contains("mongo") {
+    if service_id.contains("postgres")
+        || service_id.contains("mysql")
+        || service_id.contains("mongo")
+    {
         Some("Database".to_string())
     } else if service_id.contains("redis") {
         Some("Cache".to_string())
-    } else if service_id.contains("s3") || service_id.contains("storage") || service_id.contains("cloudinary") {
+    } else if service_id.contains("s3")
+        || service_id.contains("storage")
+        || service_id.contains("cloudinary")
+    {
         Some("Storage".to_string())
-    } else if service_id.contains("auth") || service_id.contains("oauth") || service_id.contains("clerk") {
+    } else if service_id.contains("auth")
+        || service_id.contains("oauth")
+        || service_id.contains("clerk")
+    {
         Some("Auth".to_string())
-    } else if service_id.contains("stripe") || service_id.contains("payment") || service_id.contains("razorpay") {
+    } else if service_id.contains("stripe")
+        || service_id.contains("payment")
+        || service_id.contains("razorpay")
+    {
         Some("Payments".to_string())
-    } else if service_id.contains("sentry") || service_id.contains("datadog") || service_id.contains("log") {
+    } else if service_id.contains("sentry")
+        || service_id.contains("datadog")
+        || service_id.contains("log")
+    {
         Some("Monitoring".to_string())
-    } else if service_id.contains("openai") || service_id.contains("anthropic") || service_id.contains("ai") {
+    } else if service_id.contains("openai")
+        || service_id.contains("anthropic")
+        || service_id.contains("ai")
+    {
         Some("AI/ML".to_string())
     } else {
         Some("Service".to_string())

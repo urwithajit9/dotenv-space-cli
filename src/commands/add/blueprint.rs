@@ -7,22 +7,17 @@ use colored::*;
 use dialoguer::Confirm;
 use std::path::Path;
 
-use crate::schema::{loader, resolver, formatter};
-use super::shared::{append_to_env_files, AppendMode, detect_conflicts};
+use super::shared::{append_to_env_files, detect_conflicts, AppendMode};
+use crate::schema::{formatter, loader, resolver};
+use crate::utils::ui::{info, print_header, print_preview_header, success, warning};
 
 /// Handle blueprint addition
-pub fn handle(
-    blueprint_id: &str,
-    output_path: &Path,
-    yes: bool,
-    verbose: bool,
-) -> Result<()> {
+pub fn handle(blueprint_id: &str, output_path: &Path, yes: bool, verbose: bool) -> Result<()> {
     // 1. Find blueprint
-    let blueprint = loader::get_blueprint(blueprint_id)
-        .context(format!(
-            "Unknown blueprint: '{}'. Run 'evnx init' to see available blueprints.",
-            blueprint_id
-        ))?;
+    let blueprint = loader::get_blueprint(blueprint_id).context(format!(
+        "Unknown blueprint: '{}'. Run 'evnx init' to see available blueprints.",
+        blueprint_id
+    ))?;
 
     if verbose {
         println!(
@@ -34,8 +29,8 @@ pub fn handle(
     }
 
     // 2. Resolve to variables
-    let vars = resolver::resolve_blueprint(blueprint)
-        .context("Failed to resolve blueprint variables")?;
+    let vars =
+        resolver::resolve_blueprint(blueprint).context("Failed to resolve blueprint variables")?;
 
     // 3. Check for conflicts with existing .env.example
     let example_path = output_path.join(".env.example");
@@ -51,7 +46,8 @@ pub fn handle(
     println!("{}", formatter::generate_preview(&vars).dimmed());
 
     if !conflicts.is_empty() {
-        println!("\n{}", "⚠️  Conflicts detected:".yellow().bold());
+        //println!("\n{}", "⚠️  Conflicts detected:".yellow().bold());
+        warning(&format!("{} conflicts detected", conflicts.len()));
         for conflict in &conflicts {
             println!(
                 "  • {} (existing: \"{}\", new: \"{}\")",
@@ -60,7 +56,8 @@ pub fn handle(
                 conflict.new_value.dimmed()
             );
         }
-        println!("\n{}", "Conflicting variables will be SKIPPED (not overwritten).".yellow());
+        // println!("\n{}", "Conflicting variables will be SKIPPED (not overwritten).".yellow());
+        info("Conflicting variables will be SKIPPED (not overwritten)");
     }
 
     // 5. Confirm (unless --yes)
@@ -102,12 +99,7 @@ pub fn handle(
     let content = format!("{}{}", header, addition);
 
     // 7. Append to files (skip conflicts mode)
-    append_to_env_files(
-        output_path,
-        &content,
-        AppendMode::SkipConflicts,
-        verbose,
-    )?;
+    append_to_env_files(output_path, &content, AppendMode::SkipConflicts, verbose)?;
 
     let added_count = filtered_vars.vars.len();
     println!(
@@ -131,8 +123,8 @@ pub fn handle(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
     use std::fs;
+    use tempfile::TempDir;
 
     #[test]
     fn test_handle_skips_conflicting_vars() {

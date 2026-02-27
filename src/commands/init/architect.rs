@@ -3,11 +3,19 @@ use colored::*;
 use dialoguer::{Confirm, MultiSelect, Select};
 use std::path::Path;
 
-use crate::schema::{loader, resolver,formatter};
 use super::shared::write_env_files;
+use crate::schema::{formatter, loader, resolver};
+use crate::utils::ui::{info, print_header, print_preview_header, success};
 
 /// Handle Architect mode: step-by-step custom stack building
 pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
+    // Header for Architect mode
+    if !yes {
+        print_header(
+            "Architect Mode",
+            Some("Build your custom stack: language → framework → services → infra"),
+        );
+    }
     // Step 1: Select Language
     let languages: Vec<_> = loader::schema()?
         .languages
@@ -56,9 +64,9 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
     let (service_items, service_ids): (Vec<String>, Vec<String>) = service_groups
         .iter()
         .flat_map(|(group, services)| {
-            services.iter().map(move |(id, name)| {
-                (format!("[{}] {}", group, name), id.to_string())
-            })
+            services
+                .iter()
+                .map(move |(id, name)| (format!("[{}] {}", group, name), id.to_string()))
         })
         .unzip();
 
@@ -102,7 +110,8 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
         .collect();
 
     if verbose {
-        println!("{}", "[DEBUG] Selection summary:".dimmed());
+        info("Selection summary:");
+        // println!("{}", "[DEBUG] Selection summary:".dimmed());
         println!("  Language: {}", language_id);
         println!("  Framework: {}", framework_id);
         println!("  Services: {:?}", selected_services);
@@ -118,8 +127,10 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
     )?;
 
     // Show preview
-    println!("\n{}", "📋 Preview:".bold());
-    println!("{}", formatter::generate_preview(&vars).dimmed());
+    if !yes {
+        print_preview_header();
+        println!("{}", formatter::generate_preview(&vars).dimmed());
+    }
 
     if !yes {
         let confirm = Confirm::new()
@@ -140,11 +151,15 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
     let output_path = Path::new(&path);
     write_env_files(output_path, &example_content, &template_content)?;
 
-    println!(
-        "{} Created .env.example with {} variables",
-        "✓".green(),
+    // println!(
+    //     "{} Created .env.example with {} variables",
+    //     "✓".green(),
+    //     vars.vars.len()
+    // );
+    success(&format!(
+        "Created .env.example with {} variables",
         vars.vars.len()
-    );
+    ));
 
     Ok(())
 }

@@ -10,11 +10,12 @@ use anyhow::Result;
 use colored::*;
 use std::path::Path;
 
-pub mod service;
-pub mod framework;
 pub mod blueprint;
 pub mod custom;
+pub mod framework;
+pub mod service;
 pub mod shared;
+use crate::utils::ui::{info, print_header, print_next_steps, success, warning};
 
 // use shared::{AppendMode, append_to_env_files};
 
@@ -23,9 +24,16 @@ pub fn run(
     target: crate::cli::AddTarget,
     path: String,
     yes: bool,
-    verbose: bool,  // Keep but don't pass to handlers yet
+    verbose: bool, // Keep but don't pass to handlers yet
 ) -> Result<()> {
-    let output_path = Path::new(&path);  // Convert to &str
+    if !yes {
+        print_header(
+            "evnx add",
+            Some("Add environment variables to existing .env files"),
+        );
+    }
+
+    let output_path = Path::new(&path); // Convert to &str
 
     match target {
         crate::cli::AddTarget::Service { service } => {
@@ -33,7 +41,10 @@ pub fn run(
             // service::handle expects (&str, &str, bool, bool)
             service::handle(&service, &path, yes, verbose)?;
         }
-        crate::cli::AddTarget::Framework { language, framework } => {
+        crate::cli::AddTarget::Framework {
+            language,
+            framework,
+        } => {
             framework::handle(&language, &framework, output_path, yes, verbose)?;
         }
         crate::cli::AddTarget::Blueprint { blueprint } => {
@@ -44,6 +55,13 @@ pub fn run(
         }
     }
 
-    println!("\n{}", "Tip: Run 'evnx validate' to check your .env configuration".dimmed());
+    // Common next steps at end
+    if !yes {
+        print_next_steps(&[
+            "Edit .env and replace placeholder values",
+            "Run 'evnx validate' to check for issues",
+            "Use 'evnx add' again to add more variables",
+        ]);
+    }
     Ok(())
 }

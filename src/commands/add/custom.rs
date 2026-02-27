@@ -6,15 +6,16 @@ use dialoguer::{Confirm, Input, Select};
 use std::path::Path;
 
 use super::shared::append_to_env_files;
+use crate::utils::ui::{info, print_header, print_preview_header, success};
 
 /// Handle interactive custom variable addition
-pub fn handle(
-    output_path: &Path,
-    yes: bool,
-    verbose: bool,
-) -> Result<()> {
-    println!("\n{}", "✍️  Add custom environment variables".bold());
-    println!("{}", "Enter variables one at a time. Empty name to finish.".dimmed());
+pub fn handle(output_path: &Path, yes: bool, verbose: bool) -> Result<()> {
+    print_header(
+        "Custom Variables",
+        Some("Add your own environment variables interactively"),
+    );
+
+    info("Enter variables one at a time. Empty name to finish.");
 
     let mut additions = Vec::new();
 
@@ -45,9 +46,7 @@ pub fn handle(
                 .interact()?;
 
             if add_desc {
-                Some(Input::new()
-                    .with_prompt("Description")
-                    .interact_text()?)
+                Some(Input::new().with_prompt("Description").interact_text()?)
             } else {
                 None
             }
@@ -57,7 +56,14 @@ pub fn handle(
         let category: Option<String> = if yes {
             None
         } else {
-            let categories = vec!["Application", "Security", "Database", "Auth", "Service", "Other"];
+            let categories = vec![
+                "Application",
+                "Security",
+                "Database",
+                "Auth",
+                "Service",
+                "Other",
+            ];
             let use_cat = Confirm::new()
                 .with_prompt("Assign to a category?")
                 .default(false)
@@ -128,14 +134,20 @@ pub fn handle(
     ));
 
     // Show summary
-    println!("\n{}", "📋 Summary:".bold());
-    println!("  • {} variables to add", additions.len());
+    // println!("\n{}", "📋 Summary:".bold());
+    // println!("  • {} variables to add", additions.len());
+    if !yes {
+        print_preview_header();
+        println!("  • {} variables to add", additions.len());
+    }
 
-    let categories: Vec<_> = additions.iter()
+    let categories: Vec<_> = additions
+        .iter()
         .filter_map(|(_, _, cat)| cat.as_ref())
         .collect();
 
-    let categories: Vec<String> = additions.iter()
+    let categories: Vec<String> = additions
+        .iter()
         .filter_map(|(_, _, cat)| cat.as_ref().map(|s| s.clone()))
         .collect();
 
@@ -164,11 +176,12 @@ pub fn handle(
         verbose,
     )?;
 
-    println!(
-        "{} Added {} custom variables",
-        "✓".green(),
-        additions.len()
-    );
+    // println!(
+    //     "{} Added {} custom variables",
+    //     "✓".green(),
+    //     additions.len()
+    // );
+    success(&format!("Added {} custom variables", additions.len()));
 
     Ok(())
 }

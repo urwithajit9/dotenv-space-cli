@@ -5,7 +5,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
-use common::{read_env_example, fixtures};
+use common::{fixtures, read_env_example};
 // use common::assertions::*;
 
 // ─────────────────────────────────────────────────────────────
@@ -118,13 +118,18 @@ fn add_framework_django_appends_vars() {
 
     // Should have Django vars
     for var in fixtures::DJANGO_VARS {
-        assert!(example.contains(&format!("{}=", var)),
-                "Should have {}", var);
+        assert!(
+            example.contains(&format!("{}=", var)),
+            "Should have {}",
+            var
+        );
     }
 
     // Should have framework section
-    assert!(example.contains("Framework: Django") || example.contains("# ── Framework ──"),
-            "Should have framework section marker");
+    assert!(
+        example.contains("Framework: Django") || example.contains("# ── Framework ──"),
+        "Should have framework section marker"
+    );
 }
 
 #[test]
@@ -166,19 +171,27 @@ fn add_blueprint_skips_conflicting_vars() {
         .arg("--yes")
         .assert()
         .success()
-        .stdout(predicate::str::contains("Conflicts detected").or(predicate::str::contains("Added")));
+        .stdout(
+            predicate::str::contains("Conflicts detected").or(predicate::str::contains("Added")),
+        );
 
     let example = read_env_example(dir.path()).unwrap();
 
     // Original DATABASE_URL should be preserved (conflict skipped)
-    assert!(example.contains("DATABASE_URL=postgresql://user:pass@localhost/prod_db"),
-            "Original DATABASE_URL should be preserved");
+    assert!(
+        example.contains("DATABASE_URL=postgresql://user:pass@localhost/prod_db"),
+        "Original DATABASE_URL should be preserved"
+    );
 
     // Other T3 vars should be added
-    assert!(example.contains("NEXTAUTH_SECRET="),
-            "Should add Next.js vars despite conflict");
-    assert!(example.contains("CLERK_SECRET_KEY="),
-            "Should add Clerk vars");
+    assert!(
+        example.contains("NEXTAUTH_SECRET="),
+        "Should add Next.js vars despite conflict"
+    );
+    assert!(
+        example.contains("CLERK_SECRET_KEY="),
+        "Should add Clerk vars"
+    );
 }
 
 #[test]
@@ -203,13 +216,15 @@ fn add_blueprint_to_empty_project() {
     assert!(example.contains("SOCKET_ADDR="));
 
     // Should have service vars
-    assert!(example.contains("DATABASE_URL="));  // PostgreSQL
-    assert!(example.contains("REDIS_URL="));       // Redis
-    assert!(example.contains("SENTRY_DSN="));      // Sentry
+    assert!(example.contains("DATABASE_URL=")); // PostgreSQL
+    assert!(example.contains("REDIS_URL=")); // Redis
+    assert!(example.contains("SENTRY_DSN=")); // Sentry
 
     // Should be properly sectioned
-    assert!(example.contains("# ── Blueprint:"),
-            "Should have blueprint section header");
+    assert!(
+        example.contains("# ── Blueprint:"),
+        "Should have blueprint section header"
+    );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -229,7 +244,7 @@ fn add_custom_interactive() {
         .arg("custom")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("MY_API_KEY\nsk_test_xxx\nn\nn\nn\nn\n\n")  // name, value, no desc, no cat, not required, no more, finish
+        .write_stdin("MY_API_KEY\nsk_test_xxx\nn\nn\nn\nn\n\n") // name, value, no desc, no cat, not required, no more, finish
         .assert()
         .success()
         .stdout(predicate::str::contains("Added"))
@@ -238,12 +253,16 @@ fn add_custom_interactive() {
     let example = read_env_example(dir.path()).unwrap();
 
     // Should have custom var
-    assert!(example.contains("MY_API_KEY=sk_test_xxx"),
-            "Should have custom variable");
+    assert!(
+        example.contains("MY_API_KEY=sk_test_xxx"),
+        "Should have custom variable"
+    );
 
     // Should have custom section marker
-    assert!(example.contains("# ── Custom Variables ──"),
-            "Should have Custom Variables section");
+    assert!(
+        example.contains("# ── Custom Variables ──"),
+        "Should have Custom Variables section"
+    );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -261,7 +280,7 @@ fn workflow_init_then_add_service() {
         .arg("--yes")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("0\n")  // Blank
+        .write_stdin("0\n") // Blank
         .assert()
         .success();
 
@@ -280,8 +299,14 @@ fn workflow_init_then_add_service() {
     let example = read_env_example(dir.path()).unwrap();
 
     // Should have PostgreSQL vars added to initially blank file
-    assert!(example.contains("DATABASE_URL="), "Should have added PostgreSQL vars");
-    assert!(example.contains("# [ADDED] Database"), "Should have [ADDED] marker");
+    assert!(
+        example.contains("DATABASE_URL="),
+        "Should have added PostgreSQL vars"
+    );
+    assert!(
+        example.contains("# [ADDED] Database"),
+        "Should have [ADDED] marker"
+    );
 }
 
 // #[test]

@@ -38,14 +38,12 @@ fn update_gitignore(output_path: &Path) -> Result<()> {
     let gitignore_entry = "\n# Environment files\n.env\n.env.local\n.env.*.local\n";
 
     if gitignore_path.exists() {
-        let content = fs::read_to_string(&gitignore_path)
-            .context("Failed to read .gitignore")?;
+        let content = fs::read_to_string(&gitignore_path).context("Failed to read .gitignore")?;
 
         if !content.contains(".env\n") && !content.ends_with(".env") {
             let mut updated = content;
             updated.push_str(gitignore_entry);
-            fs::write(&gitignore_path, updated)
-                .context("Failed to update .gitignore")?;
+            fs::write(&gitignore_path, updated).context("Failed to update .gitignore")?;
             println!("{} Added .env to .gitignore", "✓".green());
         }
     } else {

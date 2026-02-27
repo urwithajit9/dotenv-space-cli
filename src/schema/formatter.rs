@@ -12,14 +12,24 @@ pub fn format_env_example(vars: &VarCollection, include_footer: bool) -> Result<
     // Group by category
     let mut by_category: HashMap<Option<String>, Vec<(&String, &VarMetadata)>> = HashMap::new();
     for (name, meta) in &vars.vars {
-        by_category.entry(meta.category.clone()).or_default().push((name, meta));
+        by_category
+            .entry(meta.category.clone())
+            .or_default()
+            .push((name, meta));
     }
 
     // Define category priority order (as owned Strings for easy comparison)
     let category_order: &[&str] = &[
-        "Framework", "Application", "Security",
-        "Database", "Cache", "Auth", "Storage",
-        "Service", "Infrastructure", "CI/CD",
+        "Framework",
+        "Application",
+        "Security",
+        "Database",
+        "Cache",
+        "Auth",
+        "Storage",
+        "Service",
+        "Infrastructure",
+        "CI/CD",
     ];
 
     // Sort categories by priority, then alphabetically
@@ -75,14 +85,24 @@ pub fn format_env_template(vars: &VarCollection) -> Result<String> {
     // Group by category
     let mut by_category: HashMap<Option<String>, Vec<(&String, &VarMetadata)>> = HashMap::new();
     for (name, meta) in &vars.vars {
-        by_category.entry(meta.category.clone()).or_default().push((name, meta));
+        by_category
+            .entry(meta.category.clone())
+            .or_default()
+            .push((name, meta));
     }
 
     // Same category ordering as format_env_example
     let category_order: &[&str] = &[
-        "Framework", "Application", "Security",
-        "Database", "Cache", "Auth", "Storage",
-        "Service", "Infrastructure", "CI/CD",
+        "Framework",
+        "Application",
+        "Security",
+        "Database",
+        "Cache",
+        "Auth",
+        "Storage",
+        "Service",
+        "Infrastructure",
+        "CI/CD",
     ];
 
     let mut categories: Vec<_> = by_category.keys().collect();
@@ -124,7 +144,10 @@ pub fn format_addition(vars: &VarCollection) -> Result<String> {
 
     let mut by_category: HashMap<Option<String>, Vec<(&String, &VarMetadata)>> = HashMap::new();
     for (name, meta) in &vars.vars {
-        by_category.entry(meta.category.clone()).or_default().push((name, meta));
+        by_category
+            .entry(meta.category.clone())
+            .or_default()
+            .push((name, meta));
     }
 
     // Simple alphabetical sort for additions
@@ -179,7 +202,9 @@ pub fn generate_preview(vars: &VarCollection) -> String {
     }
 
     // List categories (convert to owned Strings for join)
-    let mut categories: Vec<String> = vars.vars.values()
+    let mut categories: Vec<String> = vars
+        .vars
+        .values()
         .filter_map(|m| m.category.as_ref().map(|s| s.clone()))
         .collect();
     categories.sort();
@@ -196,10 +221,7 @@ pub fn generate_preview(vars: &VarCollection) -> String {
 /// Returns index in priority list, or 999 for unknown categories
 fn get_category_rank(category: Option<&str>, priority_order: &[&str]) -> usize {
     match category {
-        Some(cat) => priority_order
-            .iter()
-            .position(|&p| p == cat)
-            .unwrap_or(999),
+        Some(cat) => priority_order.iter().position(|&p| p == cat).unwrap_or(999),
         None => 999, // Unknown/None categories go last
     }
 }

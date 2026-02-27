@@ -8,8 +8,8 @@ use std::path::Path;
 use tempfile::TempDir;
 
 // Submodules
-pub mod fixtures;
 pub mod assertions;
+pub mod fixtures;
 
 /// Create a temporary test directory
 pub fn test_dir() -> Result<TempDir> {
@@ -24,8 +24,7 @@ pub fn write_env_example(dir: &Path, content: &str) -> Result<()> {
 
 /// Write initial .env content
 pub fn write_env(dir: &Path, content: &str) -> Result<()> {
-    fs::write(dir.join(".env"), content)
-        .map_err(|e| anyhow::anyhow!("Failed to write .env: {}", e))
+    fs::write(dir.join(".env"), content).map_err(|e| anyhow::anyhow!("Failed to write .env: {}", e))
 }
 
 /// Read .env.example content
@@ -36,8 +35,7 @@ pub fn read_env_example(dir: &Path) -> Result<String> {
 
 /// Read .env content
 pub fn read_env(dir: &Path) -> Result<String> {
-    fs::read_to_string(dir.join(".env"))
-        .map_err(|e| anyhow::anyhow!("Failed to read .env: {}", e))
+    fs::read_to_string(dir.join(".env")).map_err(|e| anyhow::anyhow!("Failed to read .env: {}", e))
 }
 
 /// Count non-comment, non-empty lines with '='
@@ -60,7 +58,9 @@ pub fn parse_env_vars(content: &str) -> std::collections::HashMap<String, String
             if trimmed.is_empty() || trimmed.starts_with('#') {
                 return None;
             }
-            trimmed.split_once('=').map(|(k, v)| (k.to_string(), v.to_string()))
+            trimmed
+                .split_once('=')
+                .map(|(k, v)| (k.to_string(), v.to_string()))
         })
         .collect()
 }

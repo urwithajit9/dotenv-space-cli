@@ -2,7 +2,7 @@
 
 mod common;
 
-use evnx::schema::{loader, resolver, formatter};
+use evnx::schema::{formatter, loader, resolver};
 use std::collections::HashMap;
 
 // ─────────────────────────────────────────────────────────────
@@ -18,17 +18,23 @@ fn test_blueprint_components_exist() {
     for (stack_id, blueprint) in &schema.stacks {
         // Verify language exists
         assert!(
-            schema.languages.contains_key(&blueprint.components.language),
+            schema
+                .languages
+                .contains_key(&blueprint.components.language),
             "Blueprint '{}' references unknown language: {}",
-            stack_id, blueprint.components.language
+            stack_id,
+            blueprint.components.language
         );
 
         // Verify framework exists
         let lang = &schema.languages[&blueprint.components.language];
         assert!(
-            lang.frameworks.contains_key(&blueprint.components.framework),
+            lang.frameworks
+                .contains_key(&blueprint.components.framework),
             "Blueprint '{}' references unknown framework: {} for language {}",
-            stack_id, blueprint.components.framework, blueprint.components.language
+            stack_id,
+            blueprint.components.framework,
+            blueprint.components.language
         );
 
         // Verify services exist
@@ -36,7 +42,8 @@ fn test_blueprint_components_exist() {
             assert!(
                 loader::find_service(service_id).is_some(),
                 "Blueprint '{}' references unknown service: {}",
-                stack_id, service_id
+                stack_id,
+                service_id
             );
         }
 
@@ -45,7 +52,8 @@ fn test_blueprint_components_exist() {
             assert!(
                 schema.infrastructure.contains_key(infra_id),
                 "Blueprint '{}' references unknown infrastructure: {}",
-                stack_id, infra_id
+                stack_id,
+                infra_id
             );
         }
 
@@ -79,8 +87,11 @@ fn test_service_categories_are_consistent() {
     // Verify no service has conflicting category assignments
     // (This is more of a schema validation check)
     for (id, cat) in &categories {
-        assert!(cat.is_some() || id.contains("test"),
-                "Service {} should have a category (or be a test service)", id);
+        assert!(
+            cat.is_some() || id.contains("test"),
+            "Service {} should have a category (or be a test service)",
+            id
+        );
     }
 }
 
@@ -98,8 +109,11 @@ fn test_resolve_then_format_roundtrip() {
     let parsed = common::parse_env_vars(&formatted);
 
     for var_name in vars.vars.keys() {
-        assert!(parsed.contains_key(var_name),
-                "Formatted output should contain variable: {}", var_name);
+        assert!(
+            parsed.contains_key(var_name),
+            "Formatted output should contain variable: {}",
+            var_name
+        );
     }
 }
 
@@ -113,8 +127,11 @@ fn test_format_preserves_required_metadata() {
     // Required vars should have "(required)" marker
     for (name, meta) in &vars.vars {
         if meta.required {
-            assert!(formatted.contains(name) && formatted.contains("(required)"),
-                    "Required var {} should have (required) marker", name);
+            assert!(
+                formatted.contains(name) && formatted.contains("(required)"),
+                "Required var {} should have (required) marker",
+                name
+            );
         }
     }
 }
@@ -187,8 +204,10 @@ fn test_deduplication_same_service_twice() {
     let second_add_count = collection.vars.len();
 
     // Count should not increase (deduplication)
-    assert_eq!(first_add_count, second_add_count,
-               "Adding same service twice should not duplicate vars");
+    assert_eq!(
+        first_add_count, second_add_count,
+        "Adding same service twice should not duplicate vars"
+    );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -211,14 +230,16 @@ fn test_formatter_output_is_valid_env_syntax() {
 
         // Should contain exactly one '='
         let eq_count = trimmed.matches('=').count();
-        assert_eq!(eq_count, 1,
-                   "Line should have exactly one '=': {}", trimmed);
+        assert_eq!(eq_count, 1, "Line should have exactly one '=': {}", trimmed);
 
         // Key should be non-empty and uppercase/snake_case
         let key = trimmed.split('=').next().unwrap();
         assert!(!key.is_empty(), "Key should not be empty");
-        assert!(key.chars().all(|c| c.is_alphanumeric() || c == '_'),
-                "Key should be alphanumeric with underscores: {}", key);
+        assert!(
+            key.chars().all(|c| c.is_alphanumeric() || c == '_'),
+            "Key should be alphanumeric with underscores: {}",
+            key
+        );
     }
 }
 
@@ -230,40 +251,61 @@ fn test_formatter_section_ordering() {
     // Add vars in random category order
     use evnx::schema::models::{VarMetadata, VarSource};
 
-    vars.vars.insert("Z_VAR".to_string(), VarMetadata {
-        example_value: "z".to_string(),
-        description: None,
-        category: Some("Zebra".to_string()),
-        required: false,
-        source: VarSource::Service("test".to_string()),
-    });
+    vars.vars.insert(
+        "Z_VAR".to_string(),
+        VarMetadata {
+            example_value: "z".to_string(),
+            description: None,
+            category: Some("Zebra".to_string()),
+            required: false,
+            source: VarSource::Service("test".to_string()),
+        },
+    );
 
-    vars.vars.insert("A_VAR".to_string(), VarMetadata {
-        example_value: "a".to_string(),
-        description: None,
-        category: Some("Application".to_string()),
-        required: false,
-        source: VarSource::Framework("test".to_string()),
-    });
+    vars.vars.insert(
+        "A_VAR".to_string(),
+        VarMetadata {
+            example_value: "a".to_string(),
+            description: None,
+            category: Some("Application".to_string()),
+            required: false,
+            source: VarSource::Framework("test".to_string()),
+        },
+    );
 
-    vars.vars.insert("D_VAR".to_string(), VarMetadata {
-        example_value: "d".to_string(),
-        description: None,
-        category: Some("Database".to_string()),
-        required: false,
-        source: VarSource::Service("test".to_string()),
-    });
+    vars.vars.insert(
+        "D_VAR".to_string(),
+        VarMetadata {
+            example_value: "d".to_string(),
+            description: None,
+            category: Some("Database".to_string()),
+            required: false,
+            source: VarSource::Service("test".to_string()),
+        },
+    );
 
     let formatted = formatter::format_env_example(&vars, false).unwrap();
 
     // Find line numbers of section headers
     let lines: Vec<_> = formatted.lines().collect();
 
-    let app_idx = lines.iter().position(|l| l.contains("── Application ──")).unwrap();
-    let db_idx = lines.iter().position(|l| l.contains("── Database ──")).unwrap();
-    let zebra_idx = lines.iter().position(|l| l.contains("── Zebra ──")).unwrap();
+    let app_idx = lines
+        .iter()
+        .position(|l| l.contains("── Application ──"))
+        .unwrap();
+    let db_idx = lines
+        .iter()
+        .position(|l| l.contains("── Database ──"))
+        .unwrap();
+    let zebra_idx = lines
+        .iter()
+        .position(|l| l.contains("── Zebra ──"))
+        .unwrap();
 
     // Application should come before Database, which should come before Zebra
     assert!(app_idx < db_idx, "Application should come before Database");
-    assert!(db_idx < zebra_idx, "Database should come before Zebra (unknown category)");
+    assert!(
+        db_idx < zebra_idx,
+        "Database should come before Zebra (unknown category)"
+    );
 }

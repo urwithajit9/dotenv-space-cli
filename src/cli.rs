@@ -253,7 +253,5 @@ pub enum Commands {
     },
 
     /// Generate shell completions.
-    Completions {
-        shell: String,
-    },
+    Completions { shell: String },
 }

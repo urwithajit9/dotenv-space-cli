@@ -137,7 +137,10 @@ pub fn print_box(title: &str, message: &str) {
     let width = calculate_box_width(title, Some(message));
     let border = "─".repeat(width - 4);
 
-    println!("\n{}", format!("┌─ {} {}┐", title, "─".repeat(width - 4 - title.len())).cyan());
+    println!(
+        "\n{}",
+        format!("┌─ {} {}┐", title, "─".repeat(width - 4 - title.len())).cyan()
+    );
 
     for line in message.lines() {
         let padded = pad_or_truncate(line, width - 4);
@@ -430,8 +433,7 @@ fn calculate_box_width(title: &str, subtitle: Option<&str>) -> usize {
     let max_content = title_len.max(subtitle_len);
 
     // Start with base width, expand for content, clamp to limits
-    (BOX_WIDTH + max_content.saturating_sub(30))
-        .clamp(MIN_BOX_WIDTH, MAX_BOX_WIDTH)
+    (BOX_WIDTH + max_content.saturating_sub(30)).clamp(MIN_BOX_WIDTH, MAX_BOX_WIDTH)
 }
 
 /// Pad or truncate a string to fit within a width.

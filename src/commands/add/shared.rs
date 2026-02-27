@@ -74,8 +74,7 @@ pub fn append_to_env_files(
 
     // Handle .env.example
     if example_path.exists() {
-        let existing = fs::read_to_string(&example_path)
-            .context("Failed to read .env.example")?;
+        let existing = fs::read_to_string(&example_path).context("Failed to read .env.example")?;
 
         let updated = match mode {
             AppendMode::SkipConflicts => {
@@ -85,8 +84,7 @@ pub fn append_to_env_files(
             _ => format!("{}\n{}", existing.trim_end(), addition),
         };
 
-        fs::write(&example_path, updated)
-            .context("Failed to write .env.example")?;
+        fs::write(&example_path, updated).context("Failed to write .env.example")?;
 
         if verbose {
             println!(
@@ -97,15 +95,10 @@ pub fn append_to_env_files(
         }
     } else {
         // Create new file
-        fs::write(&example_path, addition.trim())
-            .context("Failed to create .env.example")?;
+        fs::write(&example_path, addition.trim()).context("Failed to create .env.example")?;
 
         if verbose {
-            println!(
-                "{} Created {}",
-                "[DEBUG]".dimmed(),
-                example_path.display()
-            );
+            println!("{} Created {}", "[DEBUG]".dimmed(), example_path.display());
         }
     }
 
@@ -118,9 +111,7 @@ pub fn append_to_env_files(
             .lines()
             .map(|line| {
                 // Preserve comments and section headers
-                if line.trim().is_empty()
-                    || line.trim().starts_with('#')
-                    || line.contains("──")
+                if line.trim().is_empty() || line.trim().starts_with('#') || line.contains("──")
                 {
                     line.to_string()
                 } else if let Some(eq_pos) = line.find('=') {
@@ -191,7 +182,7 @@ mod tests {
                 category: None,
                 required: false,
                 source: VarSource::Service("postgresql".to_string()),
-            }
+            },
         );
         vars.vars.insert(
             "REDIS_URL".to_string(),
@@ -201,7 +192,7 @@ mod tests {
                 category: None,
                 required: false,
                 source: VarSource::Service("redis".to_string()),
-            }
+            },
         );
 
         let conflicts = detect_conflicts(existing, &vars);

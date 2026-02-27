@@ -15,9 +15,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
-use common::{read_env_example, count_env_vars};
-
-
+use common::{count_env_vars, read_env_example};
 
 fn debug_print_content(label: &str, content: &str) {
     eprintln!("\n=== {} ===", label);
@@ -48,14 +46,23 @@ fn init_blank_creates_minimal_files() {
         .stdout(predicate::str::contains("Created .env.example"));
 
     // Verify files created
-    assert!(dir.path().join(".env.example").exists(), ".env.example should exist");
+    assert!(
+        dir.path().join(".env.example").exists(),
+        ".env.example should exist"
+    );
     assert!(dir.path().join(".env").exists(), ".env should exist");
-    assert!(dir.path().join(".gitignore").exists(), ".gitignore should exist");
+    assert!(
+        dir.path().join(".gitignore").exists(),
+        ".gitignore should exist"
+    );
 
     // FIX: --yes defaults to Blueprint, so we expect vars (not blank)
     let example = read_env_example(dir.path()).unwrap();
     let var_count = count_env_vars(&example);
-    assert!(var_count > 0, "Should have variables in --yes mode (defaults to Blueprint)");
+    assert!(
+        var_count > 0,
+        "Should have variables in --yes mode (defaults to Blueprint)"
+    );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -82,7 +89,10 @@ fn init_blueprint_t3_modern_generates_expected_vars() {
     let example = read_env_example(dir.path()).unwrap();
 
     // Debug output (visible with --nocapture)
-    eprintln!("\n=== Generated .env.example ===\n{}\n=== END ===\n", example);
+    eprintln!(
+        "\n=== Generated .env.example ===\n{}\n=== END ===\n",
+        example
+    );
 
     // FIX: Check for vars that exist in ANY blueprint (flexible assertions)
     // Most blueprints have these common patterns:
@@ -107,12 +117,15 @@ fn init_blueprint_t3_modern_generates_expected_vars() {
     let var_count = count_env_vars(&example);
     assert!(
         var_count >= 5 && var_count <= 50,
-        "Should have 5-50 variables, got {}", var_count
+        "Should have 5-50 variables, got {}",
+        var_count
     );
 
     // Optional: Check for common var patterns (not specific names)
-    let has_auth = example.contains("SECRET") || example.contains("KEY") || example.contains("TOKEN");
-    let has_connection = example.contains("URL=") || example.contains("HOST=") || example.contains("PORT=");
+    let has_auth =
+        example.contains("SECRET") || example.contains("KEY") || example.contains("TOKEN");
+    let has_connection =
+        example.contains("URL=") || example.contains("HOST=") || example.contains("PORT=");
 
     assert!(
         has_auth || has_connection,
@@ -137,20 +150,21 @@ fn init_blueprint_rust_high_perf() {
     let example = read_env_example(dir.path()).unwrap();
 
     // FIX: Use flexible assertions that work for any blueprint
-    assert!(
-        example.contains("# ──"),
-        "Should have section headers"
-    );
+    assert!(example.contains("# ──"), "Should have section headers");
 
     // Should have some variables
     let var_count = count_env_vars(&example);
-    assert!(var_count >= 5, "Should have at least 5 variables, got {}", var_count);
+    assert!(
+        var_count >= 5,
+        "Should have at least 5 variables, got {}",
+        var_count
+    );
 
     // Most blueprints include database or service vars
-    let has_db_or_service = example.contains("DATABASE") ||
-                           example.contains("URL=") ||
-                           example.contains("API_") ||
-                           example.contains("SECRET");
+    let has_db_or_service = example.contains("DATABASE")
+        || example.contains("URL=")
+        || example.contains("API_")
+        || example.contains("SECRET");
 
     assert!(
         has_db_or_service,
@@ -189,9 +203,12 @@ fn init_architect_multiple_services() {
 
     // Should have variables
     let var_count = count_env_vars(&example);
-    assert!(var_count >= 5, "Should have at least 5 variables, got {}", var_count);
+    assert!(
+        var_count >= 5,
+        "Should have at least 5 variables, got {}",
+        var_count
+    );
 }
-
 
 #[test]
 #[ignore = "requires interactive TTY - run manually to test specific blueprint"]
@@ -205,7 +222,7 @@ fn init_blueprint_specific_t3_modern() {
         .arg("init")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("1\n0\ny\n")  // Blueprint, first option (t3_modern), confirm
+        .write_stdin("1\n0\ny\n") // Blueprint, first option (t3_modern), confirm
         .assert()
         .success();
 
@@ -240,10 +257,7 @@ fn init_architect_python_django_postgres() {
 
     // --yes defaults to Blueprint mode, so check for blueprint vars
     // (Not specifically Django since we can't control selection with --yes)
-    assert!(
-        example.contains("="),
-        "Should have environment variables"
-    );
+    assert!(example.contains("="), "Should have environment variables");
 
     // Check for section organization
     assert!(
@@ -263,16 +277,20 @@ fn init_architect_interactive() {
         .arg("init")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("2\n0\n0\n0\n\n")  // Architect, Python, Django, PostgreSQL, no infra, confirm
+        .write_stdin("2\n0\n0\n0\n\n") // Architect, Python, Django, PostgreSQL, no infra, confirm
         .assert()
         .success();
 
     let example = read_env_example(dir.path()).unwrap();
-    assert!(example.contains("SECRET_KEY="), "Should have Django SECRET_KEY");
-    assert!(example.contains("DATABASE_URL="), "Should have DATABASE_URL");
+    assert!(
+        example.contains("SECRET_KEY="),
+        "Should have Django SECRET_KEY"
+    );
+    assert!(
+        example.contains("DATABASE_URL="),
+        "Should have DATABASE_URL"
+    );
 }
-
-
 
 // ─────────────────────────────────────────────────────────────
 // File Operations Tests
@@ -289,13 +307,16 @@ fn init_creates_nested_directory() {
         .arg("--yes")
         .arg("--path")
         .arg(&nested_path)
-        .write_stdin("0\n")  // Blank mode
+        .write_stdin("0\n") // Blank mode
         .assert()
         .success();
 
     // Verify directory was created
     assert!(nested_path.exists(), "Nested directory should be created");
-    assert!(nested_path.join(".env.example").exists(), ".env.example should exist in nested path");
+    assert!(
+        nested_path.join(".env.example").exists(),
+        ".env.example should exist in nested path"
+    );
 }
 
 #[test]
@@ -311,15 +332,21 @@ fn init_updates_gitignore() {
         .arg("--yes")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("0\n")  // Blank mode
+        .write_stdin("0\n") // Blank mode
         .assert()
         .success();
 
     // Verify .gitignore was updated, not replaced
     let gitignore = std::fs::read_to_string(dir.path().join(".gitignore")).unwrap();
-    assert!(gitignore.contains("*.log"), "Original content should be preserved");
+    assert!(
+        gitignore.contains("*.log"),
+        "Original content should be preserved"
+    );
     assert!(gitignore.contains(".env\n"), "Should add .env entry");
-    assert!(gitignore.contains(".env.local"), "Should add .env.local entry");
+    assert!(
+        gitignore.contains(".env.local"),
+        "Should add .env.local entry"
+    );
 }
 
 #[test]
@@ -336,14 +363,16 @@ fn init_does_not_overwrite_existing_env() {
         .arg("--yes")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("0\n")  // Blank mode
+        .write_stdin("0\n") // Blank mode
         .assert()
         .success();
 
     // Verify .env was NOT overwritten
     let env_content = std::fs::read_to_string(dir.path().join(".env")).unwrap();
-    assert!(env_content.contains("MY_CUSTOM_VAR=keep_this"),
-            "Existing .env should not be overwritten");
+    assert!(
+        env_content.contains("MY_CUSTOM_VAR=keep_this"),
+        "Existing .env should not be overwritten"
+    );
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -361,7 +390,7 @@ fn init_interactive_mode_selection() {
         .arg("init")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("1\n0\ny\n")  // Blueprint mode, first blueprint, confirm
+        .write_stdin("1\n0\ny\n") // Blueprint mode, first blueprint, confirm
         .assert()
         .success()
         .stdout(predicate::str::contains("Preview:"))
@@ -381,12 +410,14 @@ fn init_interactive_abort() {
         .arg("init")
         .arg("--path")
         .arg(dir.path())
-        .write_stdin("1\n0\nn\n")  // Blueprint, first blueprint, NO to confirm
+        .write_stdin("1\n0\nn\n") // Blueprint, first blueprint, NO to confirm
         .assert()
         .success()
         .stdout(predicate::str::contains("Aborted"));
 
     // Verify no files were created
-    assert!(!dir.path().join(".env.example").exists(),
-            "Should not create files when aborted");
+    assert!(
+        !dir.path().join(".env.example").exists(),
+        "Should not create files when aborted"
+    );
 }

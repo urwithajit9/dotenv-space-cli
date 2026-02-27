@@ -5,8 +5,8 @@ use colored::*;
 use dialoguer::Confirm;
 use std::path::Path;
 
-use crate::schema::{loader, resolver, formatter};
 use super::shared::{append_to_env_files, AppendMode};
+use crate::schema::{formatter, loader, resolver};
 
 /// Handle framework addition
 pub fn handle(
@@ -18,25 +18,29 @@ pub fn handle(
 ) -> Result<()> {
     // 1. Validate language exists
     let schema = loader::schema()?;
-    let language = schema
-        .languages
-        .get(language_id)
-        .context(format!(
-            "Unknown language: '{}'. Available: {}",
-            language_id,
-            schema.languages.keys().cloned().collect::<Vec<_>>().join(", ")
-        ))?;
+    let language = schema.languages.get(language_id).context(format!(
+        "Unknown language: '{}'. Available: {}",
+        language_id,
+        schema
+            .languages
+            .keys()
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(", ")
+    ))?;
 
     // 2. Validate framework exists for this language
-    let framework = language
-        .frameworks
-        .get(framework_id)
-        .context(format!(
-            "Unknown framework '{}' for language '{}'. Available: {}",
-            framework_id,
-            language_id,
-            language.frameworks.keys().cloned().collect::<Vec<_>>().join(", ")
-        ))?;
+    let framework = language.frameworks.get(framework_id).context(format!(
+        "Unknown framework '{}' for language '{}'. Available: {}",
+        framework_id,
+        language_id,
+        language
+            .frameworks
+            .keys()
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(", ")
+    ))?;
 
     if verbose {
         println!(
@@ -74,8 +78,10 @@ pub fn handle(
 
     // 6. Format as addition with framework header
     let addition = formatter::format_addition(&vars)?;
-    let header = format!("\n# ── Framework: {} ──\n",
-        framework.display_name.as_deref().unwrap_or(framework_id));
+    let header = format!(
+        "\n# ── Framework: {} ──\n",
+        framework.display_name.as_deref().unwrap_or(framework_id)
+    );
     let content = format!("{}{}", header, addition);
 
     // 7. Append to files
@@ -99,8 +105,8 @@ pub fn handle(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
     use std::fs;
+    use tempfile::TempDir;
 
     #[test]
     fn test_handle_appends_framework_vars() {
@@ -115,8 +121,8 @@ mod tests {
 
         // Verify append (not overwrite)
         let content = fs::read_to_string(&example_path).unwrap();
-        assert!(content.contains("APP_NAME=test"));  // Original preserved
-        assert!(content.contains("SECRET_KEY="));     // Django var added
+        assert!(content.contains("APP_NAME=test")); // Original preserved
+        assert!(content.contains("SECRET_KEY=")); // Django var added
         assert!(content.contains("Framework: Django")); // Section header
     }
 }

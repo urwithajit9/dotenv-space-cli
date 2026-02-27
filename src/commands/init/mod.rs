@@ -6,14 +6,15 @@
 //! 3. If Architect: step through language → framework → services → infra
 //! 4. Generate .env.example and .env with deduplicated, categorized variables
 
+use crate::utils::ui::{info, print_header, print_next_steps, success};
 use anyhow::Result;
 use colored::*;
 use dialoguer::Select;
 // use std::path::Path;
 
+mod architect;
 mod blank;
 mod blueprint;
-mod architect;
 mod shared;
 
 pub use shared::write_env_files;
@@ -24,7 +25,7 @@ pub fn run(path: String, yes: bool, verbose: bool) -> Result<()> {
         println!("{}", "Running init in verbose mode".dimmed());
     }
 
-    print_header();
+    print_init_header();
 
     // Step 1: Select mode
     let mode = if yes {
@@ -58,7 +59,7 @@ pub fn run(path: String, yes: bool, verbose: bool) -> Result<()> {
         Mode::Architect => architect::handle(path, yes, verbose)?,
     }
 
-    print_next_steps();
+    print_next_steps_ui();
     Ok(())
 }
 
@@ -69,25 +70,18 @@ enum Mode {
     Architect,
 }
 
-fn print_header() {
-    println!(
-        "\n{}",
-        "┌─ evnx init ─────────────────────────────────────┐".cyan()
-    );
-    println!(
-        "{}",
-        "│ Set up environment variables for your project  │".cyan()
-    );
-    println!(
-        "{}\n",
-        "└────────────────────────────────────────────────┘".cyan()
+fn print_init_header() {
+    print_header(
+        "evnx init",
+        Some("Set up environment variables for your project"),
     );
 }
 
-fn print_next_steps() {
-    println!("\n{}", "Next steps:".bold());
-    println!("  1. Edit .env and replace placeholder values");
-    println!("  2. Never commit .env to version control");
-    println!("  3. Run 'evnx validate' to check configuration");
-    println!("  4. Use 'evnx add' to add more variables later");
+fn print_next_steps_ui() {
+    print_next_steps(&[
+        "Edit .env and replace placeholder values",
+        "Never commit .env to version control",
+        "Run 'evnx validate' to check configuration",
+        "Use 'evnx add' to add more variables later",
+    ]);
 }

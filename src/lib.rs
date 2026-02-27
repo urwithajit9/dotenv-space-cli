@@ -24,20 +24,23 @@
 // Public API
 // ─────────────────────────────────────────────────────────────
 
-
-
 pub mod cli;
 pub mod commands;
-pub mod schema;
-pub mod utils;
 pub mod core;
 pub mod formats;
+pub mod schema;
+pub mod utils;
 
-pub use cli::{Cli, Commands, AddTarget};
+pub use cli::{AddTarget, Cli, Commands};
 pub use schema::{
-    models::{VarCollection, VarMetadata, VarSource, Schema},
-    loader::{schema as load_schema, find_service, find_framework, list_blueprints, get_frameworks_for_language, get_services_grouped},
-    resolver::{resolve_blueprint, resolve_service, resolve_framework, resolve_architect_selection},
-    formatter::{format_env_example, format_env_template, format_addition, generate_preview},
-    query::{search_services, search_frameworks, filter_by_tag, list_tags},
+    formatter::{format_addition, format_env_example, format_env_template, generate_preview},
+    loader::{
+        find_framework, find_service, get_frameworks_for_language, get_services_grouped,
+        list_blueprints, schema as load_schema,
+    },
+    models::{Schema, VarCollection, VarMetadata, VarSource},
+    query::{filter_by_tag, list_tags, search_frameworks, search_services},
+    resolver::{
+        resolve_architect_selection, resolve_blueprint, resolve_framework, resolve_service,
+    },
 };

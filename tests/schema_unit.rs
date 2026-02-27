@@ -2,7 +2,7 @@
 
 mod common;
 //use evnx::schema::{loader, resolver, formatter, query};
-use evnx::schema::{ query};
+use evnx::schema::query;
 // use evnx::schema::models::{VarCollection, VarSource};
 
 #[test]
@@ -21,7 +21,11 @@ fn test_search_services_case_insensitive() {
     let lower = query::search_services("redis");
     let upper = query::search_services("REDIS");
 
-    assert_eq!(lower.len(), upper.len(), "Search should be case-insensitive");
+    assert_eq!(
+        lower.len(),
+        upper.len(),
+        "Search should be case-insensitive"
+    );
 }
 
 #[test]
@@ -31,8 +35,10 @@ fn test_filter_by_tag() {
     assert!(!results.is_empty(), "Should have fullstack blueprints");
 
     let ids: Vec<_> = results.iter().map(|(id, _, _)| id.as_str()).collect();
-    assert!(ids.contains(&"t3_modern") || ids.contains(&"mern_v2"),
-            "Should include a fullstack blueprint");
+    assert!(
+        ids.contains(&"t3_modern") || ids.contains(&"mern_v2"),
+        "Should include a fullstack blueprint"
+    );
 }
 
 #[test]
@@ -41,6 +47,12 @@ fn test_list_tags() {
     let tags = query::list_tags();
     assert!(!tags.is_empty(), "Should have at least one tag");
 
-    assert!(tags.iter().any(|t| t == "fullstack"), "Should have 'fullstack' tag");
-    assert!(tags.iter().any(|t| t == "typescript"), "Should have 'typescript' tag");
+    assert!(
+        tags.iter().any(|t| t == "fullstack"),
+        "Should have 'fullstack' tag"
+    );
+    assert!(
+        tags.iter().any(|t| t == "typescript"),
+        "Should have 'typescript' tag"
+    );
 }

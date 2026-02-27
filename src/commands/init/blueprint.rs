@@ -3,11 +3,15 @@ use colored::*;
 use dialoguer::Select;
 use std::path::Path;
 
-use crate::schema::{loader, resolver, formatter};
 use super::shared::write_env_files;
+use crate::schema::{formatter, loader, resolver};
+use crate::utils::ui::{print_header, print_preview_header, success};
 
 /// Handle Blueprint mode: select pre-combined stack
 pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
+    if !yes {
+        print_header("Blueprint Mode", Some("Select a pre-configured stack"));
+    }
     let blueprints = loader::list_blueprints();
 
     if blueprints.is_empty() {
@@ -47,12 +51,17 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
     }
 
     // Resolve variables
-    let vars = resolver::resolve_blueprint(blueprint)
-        .context("Failed to resolve blueprint variables")?;
+    let vars =
+        resolver::resolve_blueprint(blueprint).context("Failed to resolve blueprint variables")?;
 
     // Show preview
-    println!("\n{}", "📋 Preview:".bold());
-    println!("{}", formatter::generate_preview(&vars).dimmed());
+    // println!("\n{}", "📋 Preview:".bold());
+    // println!("{}", formatter::generate_preview(&vars).dimmed());
+    // Preview section
+    if !yes {
+        print_preview_header(); // 📋 Preview:
+        println!("{}", formatter::generate_preview(&vars).dimmed());
+    }
 
     if !yes {
         let confirm = dialoguer::Confirm::new()
@@ -73,11 +82,10 @@ pub fn handle(path: String, yes: bool, verbose: bool) -> Result<()> {
     let output_path = Path::new(&path);
     write_env_files(output_path, &example_content, &template_content)?;
 
-    println!(
-        "{} Created .env.example with {} variables",
-        "✓".green(),
+    success(&format!(
+        "Created .env.example with {} variables",
         vars.vars.len()
-    );
+    ));
 
     Ok(())
 }
