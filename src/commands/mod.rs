@@ -3,12 +3,17 @@ pub mod convert;
 pub mod diff;
 pub mod doctor;
 pub mod init;
+pub mod add;
 pub mod migrate;
 pub mod restore;
 pub mod scan;
 pub mod sync;
 pub mod template;
 pub mod validate;
+
+
+pub use init::run as run_init;
+pub use add::run as run_add;
 
 pub mod completions {
     use crate::cli::Cli;
