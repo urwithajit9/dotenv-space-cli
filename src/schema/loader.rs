@@ -28,7 +28,7 @@ pub fn schema() -> Result<&'static Schema> {
 }
 
 /// Fallback for stable Rust (if get_or_try_init is unstable)
-#[cfg(not(feature = "unstable_once_cell"))]
+// #[cfg(not(feature = "unstable_once_cell"))]
 pub fn schema_fallback() -> Result<&'static Schema> {
     static FALLBACK: std::sync::OnceLock<Schema> = std::sync::OnceLock::new();
     FALLBACK.get_or_init(|| {

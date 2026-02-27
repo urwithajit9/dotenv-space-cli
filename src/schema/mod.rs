@@ -1,4 +1,4 @@
-/// Schema module: reusable infrastructure for all commands.
+//! Schema module: reusable infrastructure for all commands.
 
 pub mod models;
 pub mod loader;
